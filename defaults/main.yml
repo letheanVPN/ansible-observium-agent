@@ -9,3 +9,5 @@ observium_agent_debian_pakages:
   - snmpd
   - xinetd
   - libwww-perl
+
+observium_agent_script_dpkg: true

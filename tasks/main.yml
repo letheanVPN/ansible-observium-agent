@@ -21,6 +21,15 @@
     executable: /bin/bash
     creates: "{{ observium_base_dir }}/observium/.installed"
 
+- name: "Install Agent Module: dpkg"
+  ansible.builtin.file:
+    src: /usr/lib/observium_agent/scripts-available/dpkg
+    dest: /usr/lib/observium_agent/scripts-enabled
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: link
+  when: observium_agent_script_dpkg != false
+
 - name: Add Agent to Observium
   ansible.builtin.shell: |
     if [ ! -f "{{ observium_host_base_dir }}/observium/agents/{{ inventory_hostname }}-installed" ]; then "{{ observium_host_base_dir }}/add_device.php {{ inventory_hostname }} {{ observium_agent_secret }}"; fi

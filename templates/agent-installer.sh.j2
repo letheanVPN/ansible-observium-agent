@@ -19,6 +19,7 @@ function agentinstall {
     mkdir -p /usr/lib/observium_agent/scripts-enabled
     cp -r {{ observium_base_dir }}/observium/scripts/agent-local/* /usr/lib/observium_agent/scripts-available
     chmod +x /usr/bin/observium_agent
+    ln -sf /usr/lib/observium_agent/scripts-available/os /usr/lib/observium_agent/scripts-enabled
     ln -sf /usr/lib/observium_agent/scripts-available/dmi /usr/lib/observium_agent/scripts-enabled
     ln -sf /usr/lib/observium_agent/scripts-available/apache /usr/lib/observium_agent/scripts-enabled
     ln -sf /usr/lib/observium_agent/scripts-available/mysql /usr/lib/observium_agent/scripts-enabled
