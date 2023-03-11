@@ -11,3 +11,4 @@ observium_agent_debian_pakages:
   - libwww-perl
 
 observium_agent_script_dpkg: true
+observium_agent_script_openvpn: false
