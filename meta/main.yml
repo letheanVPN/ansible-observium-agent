@@ -1,0 +1,22 @@
+galaxy_info:
+  author: snider
+  description: Installs Observium Agent
+  company: Lethean Community Interest Company
+  license: EUPL-1.2
+  min_ansible_version: "2.1"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+        - focal
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+  galaxy_tags:
+    - observium
+    - monitoring
+
+dependencies: []
+

@@ -1,0 +1,33 @@
+---
+
+- name: "ufw: Allow Agent connections"
+  community.general.ufw:
+    port: 36602
+    proto: tcp
+    state: enabled
+    policy: allow
+    comment: "Allow Agent connections"
+
+- name: "ufw: Allow SNMP connections"
+  community.general.ufw:
+    port: 161
+    proto: udp
+    state: enabled
+    policy: allow
+    comment: "Allow Allow SNMP connections"
+
+- name: "ufw: Allow SNMP connections"
+  community.general.ufw:
+    port: 162
+    proto: udp
+    state: enabled
+    policy: allow
+    comment: "Allow Allow SNMP connections"
+
+- name: restart ufw
+  service:
+    name: ufw
+    state: restarted
+
+
+

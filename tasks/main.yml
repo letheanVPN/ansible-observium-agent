@@ -1,0 +1,34 @@
+---
+- name: debian | Installing Debian Pre-Req Packages
+  apt:
+    name: "{{ item }}"
+    state: "present"
+  with_items: '{{ observium_agent_debian_pakages }}'
+  when: ansible_os_family == "Debian"
+
+- name: Configure Firewall
+  import_tasks: firewall.yml
+
+- name: Upload Agent Installer
+  template:
+    src: "agent-installer.sh.j2"
+    mode: "0777"
+    dest: "{{ observium_base_dir }}/agent-installer.sh"
+
+- name: Run Agent Installer
+  ansible.builtin.shell: "{{ observium_base_dir }}/agent-installer.sh"
+  args:
+    executable: /bin/bash
+    creates: "{{ observium_base_dir }}/observium/.installed"
+
+- name: Add Agent to Observium
+  ansible.builtin.shell: |
+    if [ ! -f "{{ observium_host_base_dir }}/observium/agents/{{ inventory_hostname }}-installed" ]; then "{{ observium_host_base_dir }}/add_device.php {{ inventory_hostname }} {{ observium_agent_secret }}"; fi
+    if [ ! -d "{{ observium_host_base_dir }}/observium/agents" ]; then  mkdir -p "{{ observium_host_base_dir }}/observium/agents"; fi
+    if [ ! -f "{{ observium_host_base_dir }}/observium/agents/{{ inventory_hostname }}-installed" ]; then echo "{{ observium_agent_secret }}" > "{{ observium_host_base_dir }}/observium/agents/{{ inventory_hostname }}-installed"; fi
+  args:
+    executable: bash
+    creates: "{{ observium_base_dir }}/observium/agents/{{ inventory_hostname }}-installed"
+  delegate_to: "{{ observium_host }}"
+  delegate_facts: true
+  become_user: "{{ ansible_user }}"

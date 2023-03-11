@@ -1,0 +1,11 @@
+---
+observium_host: "dev.lthn.network"
+observium_agent_secret: "default"
+observium_agent_install_unix: true
+observium_agent_install_windows: false
+observium_base_dir: "/opt"
+observium_host_base_dir: "{{ observium_base_dir }}"
+observium_agent_debian_pakages:
+  - snmpd
+  - xinetd
+  - libwww-perl
