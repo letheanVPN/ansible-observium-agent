@@ -8,6 +8,29 @@
 
 - name: Configure Firewall
   import_tasks: firewall.yml
+- name: debian | Installing Debian Pre-Req Packages
+  apt:
+    name: "{{ item }}"
+    state: "present"
+  with_items: '{{ observium_debian_pre_reqs }}'
+- name: Force fail when svn user not defined
+  fail:
+    msg: "observium_commercial_svn_user variable is undefined, this means we cannot clone from observium SVN"
+  when: not observium_commercial_svn_user | length > 0
+
+- name: Force fail when svn password not defined
+  fail:
+    msg: "observium_commercial_svn_password variable is undefined, this means we cannot clone from observium SVN"
+  when: not observium_commercial_svn_password | length > 0
+
+- name: install-commercial | Downloading Observium to {{ observium_dl_dir }}
+  subversion:
+    repo: "{{ observium_commercial_svn_repo }}"
+    dest: "{{ observium_base_dir }}"
+    username: "{{ observium_commercial_svn_user }}"
+    password: "{{ observium_commercial_svn_password }}"
+    update: yes
+
 
 - name: Upload Agent Installer
   template:
@@ -19,34 +42,15 @@
   ansible.builtin.shell: "{{ observium_base_dir }}/agent-installer.sh"
   args:
     executable: /bin/bash
-    creates: "{{ observium_base_dir }}/observium/.installed"
-
-- name: "Install Agent Module: dpkg"
-  ansible.builtin.file:
-    src: /usr/lib/observium_agent/scripts-available/dpkg
-    dest: /usr/lib/observium_agent/scripts-enabled
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    state: link
-  when: observium_agent_script_dpkg != false
-
-- name: "Install Agent Module: openvpn"
-  ansible.builtin.file:
-    src: /usr/lib/observium_agent/scripts-available/openvpn
-    dest: /usr/lib/observium_agent/scripts-enabled
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    state: link
-  when: observium_agent_script_openvpn != false
+    creates: "{{ observium_base_dir }}/.installed"
 
 - name: Add Agent to Observium
   ansible.builtin.shell: |
-    if [ ! -f "{{ observium_host_base_dir }}/observium/agents/{{ inventory_hostname }}-installed" ]; then "{{ observium_host_base_dir }}/add_device.php {{ inventory_hostname }} {{ observium_agent_secret }}"; fi
-    if [ ! -d "{{ observium_host_base_dir }}/observium/agents" ]; then  mkdir -p "{{ observium_host_base_dir }}/observium/agents"; fi
-    if [ ! -f "{{ observium_host_base_dir }}/observium/agents/{{ inventory_hostname }}-installed" ]; then echo "{{ observium_agent_secret }}" > "{{ observium_host_base_dir }}/observium/agents/{{ inventory_hostname }}-installed"; fi
+     php /opt/observium/add_device.php {{ inventory_hostname }} {{ observium_agent_secret }}
   args:
     executable: bash
-    creates: "{{ observium_base_dir }}/observium/agents/{{ inventory_hostname }}-installed"
-  delegate_to: "{{ observium_host }}"
+  delegate_to: "{{ ansible_user }}@{{ observium_host }}"
   delegate_facts: true
-  become_user: "{{ ansible_user }}"
+  become: true
+  become_user: "root"
+  tags: [ 'observium_agent:register' ]

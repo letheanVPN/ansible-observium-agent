@@ -11,23 +11,23 @@ NC='\033[0m' # No Color
 
 function agentinstall {
     echo -e "${GREEN}Installing additional packages...${NC}"
-    cp {{ observium_base_dir }}/observium/scripts/observium_agent_xinetd /etc/xinetd.d/observium_agent_xinetd
+    cp {{ observium_base_dir }}/scripts/observium_agent_xinetd /etc/xinetd.d/observium_agent_xinetd
     service xinetd restart
-    cp {{ observium_base_dir }}/observium/scripts/observium_agent /usr/bin/observium_agent
+    cp {{ observium_base_dir }}/scripts/observium_agent /usr/bin/observium_agent
     mkdir -p /usr/lib/observium_agent
     mkdir -p /usr/lib/observium_agent/scripts-available
     mkdir -p /usr/lib/observium_agent/scripts-enabled
-    cp -r {{ observium_base_dir }}/observium/scripts/agent-local/* /usr/lib/observium_agent/scripts-available
+    cp -r {{ observium_base_dir }}/scripts/agent-local/* /usr/lib/observium_agent/scripts-available
     chmod +x /usr/bin/observium_agent
-    ln -sf /usr/lib/observium_agent/scripts-available/os /usr/lib/observium_agent/scripts-enabled
-    ln -sf /usr/lib/observium_agent/scripts-available/dmi /usr/lib/observium_agent/scripts-enabled
-    ln -sf /usr/lib/observium_agent/scripts-available/apache /usr/lib/observium_agent/scripts-enabled
-    ln -sf /usr/lib/observium_agent/scripts-available/mysql /usr/lib/observium_agent/scripts-enabled
+    ln -sf /usr/lib/observium_agent/scripts-available/os /usr/lib/observium_agent/scripts-enabled/os
+    ln -sf /usr/lib/observium_agent/scripts-available/dmi /usr/lib/observium_agent/scripts-enabled/dmi
+    ln -sf /usr/lib/observium_agent/scripts-available/apache /usr/lib/observium_agent/scripts-enabled/apache
+    ln -sf /usr/lib/observium_agent/scripts-available/mysql /usr/lib/observium_agent/scripts-enabled/mysql
 }
 
 function snmpdinstall {
 
-  cp {{ observium_base_dir }}/observium/scripts/distro /usr/local/bin/distro
+  cp {{ observium_base_dir }}/scripts/distro /usr/local/bin/distro
   chmod +x /usr/local/bin/distro
   echo -e "${YELLOW}Reconfiguring local snmpd${NC}"
   echo "agentAddress  udp:161,udp6:[::1]:161" > /etc/snmp/snmpd.conf
@@ -81,4 +81,7 @@ snmpdinstall
 
 agentinstall
 
-echo "Installed" >> {{ observium_base_dir }}/observium/.installed
+/etc/init.d/xinetd restart
+/etc/init.d/snmpd restart
+
+echo "Installed" >> {{ observium_base_dir }}/.installed
